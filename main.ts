@@ -88,104 +88,106 @@ class OriginShiftMaze {
         this.clearOriginDirections();
     }
 
-}
-
-function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
-    const distance = 50;
-    const size = 50;
-    const wallWidth = 5;
-    const offsetX = 500;
-    const offsetY = 100;
-    const mazeOnly = false;
-    for (var i = 0; i < mazeObj.height; i++) {
-        for (var j = 0; j < mazeObj.width; j++) {
-            let k = mazeObj.matrix[i][j];
-            ctx.beginPath();
-            switch (k) {
-                case MazeNode.NONE:
-                    ctx.fillStyle = (i == mazeObj.originY && j == mazeObj.originX)
-                        ? "red" : (mazeOnly ? "white" : "black");
-                    ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
-                    ctx.fill();
-                    ctx.closePath();
-                    break;
-                case MazeNode.DOWN:
-                    ctx.fillStyle = (mazeOnly ? "grey" :"blue");
-                    if (mazeOnly) {
-                        ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, wallWidth, size);
+    draw(ctx:CanvasRenderingContext2D, unitSize:number=50, unitDist:number=50, offsetX:number=500, offsetY:number=100,  wallWidth:number=5, mazeOnly:boolean=false) {
+        for (var i = 0; i < this.height; i++) {
+            for (var j = 0; j < this.width; j++) {
+                let k = this.matrix[i][j];
+                ctx.beginPath();
+                switch (k) {
+                    case MazeNode.NONE:
+                        ctx.fillStyle = (i == this.originY && j == this.originX)
+                            ? "red" : (mazeOnly ? "white" : "black");
+                        ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, unitSize, unitSize);
                         ctx.fill();
-                        ctx.rect((distance*j-wallWidth+size)+offsetX, (distance*i)+offsetY, wallWidth, size);
+                        ctx.closePath();
+                        break;
+                    case MazeNode.DOWN:
+                        ctx.fillStyle = (mazeOnly ? "grey" :"blue");
+                        if (mazeOnly) {
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, wallWidth, unitSize);
+                            ctx.fill();
+                            ctx.rect((unitDist*j-wallWidth+unitSize)+offsetX, (unitDist*i)+offsetY, wallWidth, unitSize);
+                            ctx.fill();
+                        } else {
+                            ctx.moveTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
+                            ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
+                            ctx.lineTo((unitDist*j+(unitSize/2))+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.lineTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
+                            ctx.fill();
+                        }
+                        ctx.closePath();
+                        break;
+                    case MazeNode.LEFT:
+                        ctx.fillStyle = (mazeOnly ? "grey" :"green");
+                        if (mazeOnly) {
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, unitSize, wallWidth);
+                            ctx.fill();
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i-wallWidth+unitSize)+offsetY, unitSize, wallWidth); 
+                            ctx.fill();
+                        } else {
+                            ctx.moveTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
+                            ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+(unitSize/2))+offsetY);
+                            ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
+                            ctx.fill();
+                        }
+                        ctx.closePath();
+                        break;
+                    case MazeNode.RIGHT:
+                        ctx.fillStyle = (mazeOnly ? "grey" :"yellow");
+                        if (mazeOnly) {
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, unitSize, wallWidth);
+                            ctx.fill();
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i-wallWidth+unitSize)+offsetY, unitSize, wallWidth); 
+                            ctx.fill();
+                        } else {
+                            ctx.moveTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
+                            ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+(unitSize/2))+offsetY);
+                            ctx.lineTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
+                            ctx.fill();
+                        }
+                        ctx.closePath();
+                        break;
+                    case MazeNode.UP:
+                        ctx.fillStyle = (mazeOnly ? "grey" :"orange");
+                        if (mazeOnly) {
+                            ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, wallWidth, unitSize);
+                            ctx.fill();
+                            ctx.rect((unitDist*j-wallWidth+unitSize)+offsetX, (unitDist*i)+offsetY, wallWidth, unitSize);
+                            ctx.fill();
+                        } else {
+                            ctx.moveTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.lineTo((unitDist*j+(unitSize/2))+offsetX, (unitDist*i)+offsetY);
+                            ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
+                            ctx.fill();
+                        }
+                        ctx.closePath();
+                        break;
+                    default:
+                        ctx.fillStyle = "white";
                         ctx.fill();
-                    } else {
-                        ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
-                        ctx.lineTo((distance*j+size)+offsetX, (distance*i)+offsetY);
-                        ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i+size)+offsetY);
-                        ctx.lineTo((distance*j)+offsetX, (distance*i)+offsetY);
-                        ctx.fill();
-                    }
-                    ctx.closePath();
-                    break;
-                case MazeNode.LEFT:
-                    ctx.fillStyle = (mazeOnly ? "grey" :"green");
-                    if (mazeOnly) {
-                        ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, wallWidth);
-                        ctx.fill();
-                        ctx.rect((distance*j)+offsetX, (distance*i-wallWidth+size)+offsetY, size, wallWidth); 
-                        ctx.fill();
-                    } else {
-                        ctx.moveTo((distance*j+size)+offsetX, (distance*i)+offsetY);
-                        ctx.lineTo((distance*j+size)+offsetX, (distance*i+size)+offsetY);
-                        ctx.lineTo((distance*j)+offsetX, (distance*i+(size/2))+offsetY);
-                        ctx.lineTo((distance*j+size)+offsetX, (distance*i)+offsetY);
-                        ctx.fill();
-                    }
-                    ctx.closePath();
-                    break;
-                case MazeNode.RIGHT:
-                    ctx.fillStyle = (mazeOnly ? "grey" :"yellow");
-                    if (mazeOnly) {
-                        ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, wallWidth);
-                        ctx.fill();
-                        ctx.rect((distance*j)+offsetX, (distance*i-wallWidth+size)+offsetY, size, wallWidth); 
-                        ctx.fill();
-                    } else {
-                        ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
-                        ctx.lineTo((distance*j)+offsetX, (distance*i+size)+offsetY);
-                        ctx.lineTo((distance*j+size)+offsetX, (distance*i+(size/2))+offsetY);
-                        ctx.lineTo((distance*j)+offsetX, (distance*i)+offsetY);
-                        ctx.fill();
-                    }
-                    ctx.closePath();
-                    break;
-                case MazeNode.UP:
-                    ctx.fillStyle = (mazeOnly ? "grey" :"orange");
-                    if (mazeOnly) {
-                        ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, wallWidth, size);
-                        ctx.fill();
-                        ctx.rect((distance*j-wallWidth+size)+offsetX, (distance*i)+offsetY, wallWidth, size);
-                        ctx.fill();
-                    } else {
-                        ctx.moveTo((distance*j)+offsetX, (distance*i+size)+offsetY);
-                        ctx.lineTo((distance*j+size)+offsetX, (distance*i+size)+offsetY);
-                        ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i)+offsetY);
-                        ctx.lineTo((distance*j)+offsetX, (distance*i+size)+offsetY);
-                        ctx.fill();
-                    }
-                    ctx.closePath();
-                    break;
-                default:
-                    ctx.fillStyle = "white";
-                    ctx.fill();
-                    ctx.closePath();
-                    break;
+                        ctx.closePath();
+                        break;
+                }
+    
             }
-
         }
     }
+
 }
 
 var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
-
+let m = mazeObj.stepTimesCalculate();
+let n = 0;
+function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
+    mazeObj.draw(ctx);
+    if (n < m) {
+        mazeObj.step();
+        n++;
+    }
+}
 
 function resizeCanvas() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -193,17 +195,13 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
 }
 
-let m = mazeObj.stepTimesCalculate();
-let n = 0;
+
 function draw() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas.getContext) {
         let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        if (n < m) {
-            mazeObj.step();
-            n++;
-        }
+
         drawMaze(
             mazeObj,
             ctx,
