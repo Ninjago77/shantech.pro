@@ -59,25 +59,53 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
             switch (k) {
                 case Cell.BLOCK:
                     ctx.fillStyle = "black";
+                    ctx.rect(30*j, 30*i, 10, 10);
+                    ctx.fill();
+                    ctx.closePath();
                     break;
                 case Cell.DOWN:
                     ctx.fillStyle = "blue";
+                    ctx.moveTo(30*j, 30*i);
+                    ctx.lineTo(30*j, 30*i+10);
+                    ctx.lineTo(30*j+10, 30*i+(10/2));
+                    ctx.lineTo(30*j, 30*i);
+                    ctx.fill();
+                    ctx.closePath();
                     break;
                 case Cell.LEFT:
                     ctx.fillStyle = "green";
+                    ctx.moveTo(30*j, 30*i);
+                    ctx.lineTo(30*j, 30*i+10);
+                    ctx.lineTo(30*j+10, 30*i+(10/2));
+                    ctx.lineTo(30*j, 30*i);
+                    ctx.fill();
+                    ctx.closePath();
                     break;
                 case Cell.RIGHT:
                     ctx.fillStyle = "yellow";
+                    ctx.moveTo(30*j, 30*i);
+                    ctx.lineTo(30*j, 30*i+10);
+                    ctx.lineTo(30*j+10, 30*i+(10/2));
+                    ctx.lineTo(30*j, 30*i);
+                    ctx.fill();
+                    ctx.closePath();
                     break;
                 case Cell.UP:
                     ctx.fillStyle = "red";
+                    ctx.moveTo(30*j, 30*i);
+                    ctx.lineTo(30*j, 30*i+10);
+                    ctx.lineTo(30*j+10, 30*i+(10/2));
+                    ctx.lineTo(30*j, 30*i);
+                    ctx.fill();
+                    ctx.closePath();
                     break;
                 default:
                     ctx.fillStyle = "white";
+                    ctx.fill();
+                    ctx.closePath();
+                    break;
             }
-            ctx.rect(30*j, 30*i, 10, 10);
-            ctx.fill();
-            ctx.closePath();
+
         }
     }
 }
