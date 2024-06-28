@@ -51,8 +51,35 @@ class OriginShiftMaze {
 }
 
 function drawMaze(ctx:CanvasRenderingContext2D) {
-    var m = new OriginShiftMaze(5,5); // new Maze(5,5);
-    console.log(m);
+    var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
+    for (var i = 0; i < mazeObj.matrixHeight; i++) {
+        for (var j = 0; j < mazeObj.matrixWidth; j++) {
+            let k = mazeObj.matrix[i][j];
+            ctx.beginPath();
+            switch (k) {
+                case Cell.BLOCK:
+                    ctx.fillStyle = "black";
+                    break;
+                case Cell.DOWN:
+                    ctx.fillStyle = "blue";
+                    break;
+                case Cell.LEFT:
+                    ctx.fillStyle = "green";
+                    break;
+                case Cell.RIGHT:
+                    ctx.fillStyle = "yellow";
+                    break;
+                case Cell.UP:
+                    ctx.fillStyle = "red";
+                    break;
+                default:
+                    ctx.fillStyle = "white";
+            }
+            ctx.rect(30*j, 30*i, 10, 10);
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
 }
 
 function draw() {
