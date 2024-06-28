@@ -1,7 +1,6 @@
 // npm install -D @types/node
-enum Cell{
+enum MazeNode{
     NONE = -1,
-    BLOCK = 0,
     DOWN = 1,
     LEFT = 2,
     RIGHT = 3,
@@ -12,104 +11,83 @@ const randomInt = (min, max) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
 class OriginShiftMaze {
-    public matrix: Cell[][];
-    public matrixHeight: number;
-    public matrixWidth: number;
-    public originCellX: number;
-    public originCellY: number;
-    constructor(public cellHeight: number, public cellWidth: number) {
-        this.matrixHeight = cellHeight*2 - 1;
-        this.matrixWidth = cellWidth*2 - 1;
-        this.originCellX = cellWidth - 1;
-        this.originCellY = cellHeight - 1;
-        this.matrix = new Array(this.matrixHeight).fill(0).map(() => new Array(this.matrixWidth).fill(0).map(() => Cell.NONE));
-        for (var i = 0; i < this.cellHeight; i++) {
-            for (var j = 0; j < this.cellWidth; j++) {
-                this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][OriginShiftMaze.cellCoordinateToSize(j)] = Cell.BLOCK;
+    public matrix: MazeNode[][];
+    public originX: number;
+    public originY: number;
+    constructor(public height: number, public width: number) {
+        this.originX = this.width - 1;
+        this.originY = this.height - 1;
+        this.matrix = new Array(this.height).fill(0).map(() => new Array(this.width).fill(0).map(() => MazeNode.NONE));
+        for (var i = 0; i < this.height; i++) {
+            for (var j = 0; j < this.width; j++) {
+                this.matrix[i][j] = MazeNode.RIGHT;
             }
         }
-        for (var i = 0; i < this.cellHeight; i++) {
-            for (var j = 0; j < this.matrixWidth; j++) {
-                if (this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][j] != Cell.BLOCK) {
-                    this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][j] = Cell.RIGHT;
-                }
-            }
+        for (var i = 0; i < this.height; i++) {
+            this.matrix[i][this.width-1] = MazeNode.DOWN;
         }
-        for (var i = 0; i < this.matrixHeight; i++) {
-            if (this.matrix[i][this.matrixWidth-1] != Cell.BLOCK) {
-                this.matrix[i][this.matrixWidth-1] = Cell.DOWN;
-            }
-        }
+        this.clearOriginDirections();
     }
-    
-    static cellCoordinateToSize(pos: number) {
-        return pos*2; 
+    clearOriginDirections() {
+        this.matrix[this.originY][this.originX] = MazeNode.NONE;
     }
-    static sizeCoordinateToCell(pos: number) {
-        return pos/2; 
-    }
-
-    originSizeX() {
-        return OriginShiftMaze.cellCoordinateToSize(this.originCellX);
-    }
-    originSizeY() {
-        return OriginShiftMaze.cellCoordinateToSize(this.originCellY);
-    }
-
     updateFromNewOrigin(newOriginCellX: number, newOriginCellY: number) {
-        if (this.originCellX-1 == newOriginCellX) {
-            this.matrix[this.originSizeY()][this.originSizeX()-1] = Cell.LEFT;
+        if (this.originX-1 == newOriginCellX) {
+            this.matrix[this.originY][this.originX] = MazeNode.LEFT;
         }
-        if (this.originCellX+1 == newOriginCellX) {
-            this.matrix[this.originSizeY()][this.originSizeX()+1] = Cell.RIGHT;
+        if (this.originX+1 == newOriginCellX) {
+            this.matrix[this.originY][this.originX] = MazeNode.RIGHT;
         }
-        if (this.originCellY-1 == newOriginCellY) {
-            this.matrix[this.originSizeY()-1][this.originSizeX()] = Cell.UP;
+        if (this.originY-1 == newOriginCellY) {
+            this.matrix[this.originY][this.originX] = MazeNode.UP;
         }
-        if (this.originCellY+1 == newOriginCellY) {
-            this.matrix[this.originSizeY()+1][this.originSizeX()] = Cell.DOWN;
+        if (this.originY+1 == newOriginCellY) {
+            this.matrix[this.originY][this.originX] = MazeNode.DOWN;
         }
-        this.originCellX = newOriginCellX;
-        this.originCellY = newOriginCellY;
+        this.originX = newOriginCellX;
+        this.originY = newOriginCellY;
     }
 
-    randomNewOrigin() {
+    randomNewOrigin():object {
         let options: object[] = [];
-        if (this.originCellX != 0) {
-            if (this.matrix[this.originSizeY()][this.originSizeX()-1] != Cell.NONE) {
-                options.push({
-                    x: this.originCellX - 1,
-                    y: this.originCellY,
-                });
-            }
+        if (this.originX != 0) {
+            options.push({
+                x: this.originX - 1,
+                y: this.originY,
+            });
         }
-        if (this.originCellX != (this.cellWidth - 1)) {
-            if (this.matrix[this.originSizeY()][this.originSizeX()+1] != Cell.NONE) {
-                options.push({
-                    x: this.originCellX + 1,
-                    y: this.originCellY,
-                });
-            }
+        if (this.originX != (this.width - 1)) {
+            options.push({
+                x: this.originX + 1,
+                y: this.originY,
+            });
         }
-        if (this.originCellY != 0) {
-            if (this.matrix[this.originSizeY()-1][this.originSizeX()] != Cell.NONE) {
-                options.push({
-                    x: this.originCellX,
-                    y: this.originCellY - 1,
-                });
-            }
+        if (this.originY != 0) {
+            options.push({
+                x: this.originX,
+                y: this.originY - 1,
+            });
         }
-        if (this.originCellY != (this.cellHeight - 1)) {
-            if (this.matrix[this.originSizeY()+1][this.originSizeX()] != Cell.NONE) {
-                options.push({
-                    x: this.originCellX,
-                    y: this.originCellY + 1,
-                });
-            }
+        if (this.originY != (this.height - 1)) {
+            options.push({
+                x: this.originX,
+                y: this.originY + 1,
+            });
         }
         let newOrigin = options[randomInt(0, options.length - 1)];
-        this.updateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+        return newOrigin;
     }
+
+    stepTimesCalculate():number {
+        return this.width * this.height *10;
+    }
+
+    step() {
+        let newOrigin = this.randomNewOrigin();
+        this.updateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+        this.clearOriginDirections();
+    }
+
 }
 
 function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
@@ -119,25 +97,19 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
     const offsetX = 500;
     const offsetY = 100;
     const mazeOnly = false;
-    for (var i = 0; i < mazeObj.matrixHeight; i++) {
-        for (var j = 0; j < mazeObj.matrixWidth; j++) {
+    for (var i = 0; i < mazeObj.height; i++) {
+        for (var j = 0; j < mazeObj.width; j++) {
             let k = mazeObj.matrix[i][j];
             ctx.beginPath();
             switch (k) {
-                case Cell.BLOCK:
-                    ctx.fillStyle = (i == mazeObj.originSizeY() && j == mazeObj.originSizeX())
+                case MazeNode.NONE:
+                    ctx.fillStyle = (i == mazeObj.originY && j == mazeObj.originX)
                         ? "red" : (mazeOnly ? "white" : "black");
                     ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
                     ctx.fill();
                     ctx.closePath();
                     break;
-                case Cell.NONE:
-                    ctx.fillStyle = "grey";
-                    ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
-                    ctx.fill();
-                    ctx.closePath();
-                    break;
-                case Cell.DOWN:
+                case MazeNode.DOWN:
                     ctx.fillStyle = (mazeOnly ? "grey" :"blue");
                     if (mazeOnly) {
                         ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, wallWidth, size);
@@ -153,7 +125,7 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     }
                     ctx.closePath();
                     break;
-                case Cell.LEFT:
+                case MazeNode.LEFT:
                     ctx.fillStyle = (mazeOnly ? "grey" :"green");
                     if (mazeOnly) {
                         ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, wallWidth);
@@ -169,7 +141,7 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     }
                     ctx.closePath();
                     break;
-                case Cell.RIGHT:
+                case MazeNode.RIGHT:
                     ctx.fillStyle = (mazeOnly ? "grey" :"yellow");
                     if (mazeOnly) {
                         ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, wallWidth);
@@ -185,7 +157,7 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     }
                     ctx.closePath();
                     break;
-                case Cell.UP:
+                case MazeNode.UP:
                     ctx.fillStyle = (mazeOnly ? "grey" :"orange");
                     if (mazeOnly) {
                         ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, wallWidth, size);
@@ -221,12 +193,17 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
 }
 
+let m = mazeObj.stepTimesCalculate();
+let n = 0;
 function draw() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas.getContext) {
         let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
+        if (n < m) {
+            mazeObj.step();
+            n++;
+        }
         drawMaze(
             mazeObj,
             ctx,
@@ -237,7 +214,7 @@ function draw() {
 
 function addEventListeners() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.addEventListener('click', (event) => mazeObj.randomNewOrigin());
+    // canvas.addEventListener('click', (event) => mazeObj.randomNewOrigin());
 }
 
 resizeCanvas();
