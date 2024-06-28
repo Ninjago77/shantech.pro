@@ -1,25 +1,21 @@
 // npm install -D @types/node
-enum Direction{
-    NODE = 0,
+enum Cell{
+    NONE = -1,
+    BLOCK = 0,
     DOWN = 1,
     LEFT = 2,
     RIGHT = 3,
     UP = 4,
 }
 
-class Cell {
-    constructor(public dir: Direction | null) {
-        this.dir = dir;
-    }
-}
 
 class Maze {
     public matrix: Cell[][];
     constructor(public height: number, public width: number) {
-        this.matrix = new Array((2*height)-1).fill(0).map(() => new Array((2*width)-1).fill(0).map(() => new Cell(null)));
+        this.matrix = new Array((2*height)-1).fill(0).map(() => new Array((2*width)-1).fill(0).map(() => Cell.NONE));
         for (var i = 0; i <= this.matrix.length; i+=2) {
             for (var j = 0; j <= this.matrix[i].length; j+=2) {
-                this.matrix[i][j] = new Cell(Direction.NODE);
+                this.matrix[i][j] = Cell.BLOCK;
             }
         }
     }
@@ -44,3 +40,5 @@ function draw() {
 
     }
 }
+draw();
+window.addEventListener('resize', draw);
