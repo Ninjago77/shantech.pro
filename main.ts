@@ -105,10 +105,11 @@ class OriginShiftMaze {
 }
 
 function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
-    const distance = 30;
-    const size = 10;
-    const offsetX = 50;
-    const offsetY = 50;
+    const distance = 50;
+    const size = 40;
+    const offsetX = 500;
+    const offsetY = 100;
+    const mazeOnly = true;
     for (var i = 0; i < mazeObj.matrixHeight; i++) {
         for (var j = 0; j < mazeObj.matrixWidth; j++) {
             let k = mazeObj.matrix[i][j];
@@ -116,13 +117,19 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
             switch (k) {
                 case Cell.BLOCK:
                     ctx.fillStyle = (i == mazeObj.originSizeY() && j == mazeObj.originSizeX())
-                        ? "red" : "black";
+                        ? "red" : (mazeOnly ? "white" : "black");
+                    ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
+                    ctx.fill();
+                    ctx.closePath();
+                    break;
+                case Cell.NONE:
+                    ctx.fillStyle = (mazeOnly ? "white" :"grey");
                     ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case Cell.DOWN:
-                    ctx.fillStyle = "blue";
+                    ctx.fillStyle = (mazeOnly ? "white" :"blue");
                     ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j+size)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i+size)+offsetY);
@@ -131,7 +138,7 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     ctx.closePath();
                     break;
                 case Cell.LEFT:
-                    ctx.fillStyle = "green";
+                    ctx.fillStyle = (mazeOnly ? "white" :"green");
                     ctx.moveTo((distance*j+size)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j+size)+offsetX, (distance*i+size)+offsetY);
                     ctx.lineTo((distance*j)+offsetX, (distance*i+(size/2))+offsetY);
@@ -140,7 +147,7 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     ctx.closePath();
                     break;
                 case Cell.RIGHT:
-                    ctx.fillStyle = "yellow";
+                    ctx.fillStyle = (mazeOnly ? "white" :"yellow");
                     ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j)+offsetX, (distance*i+size)+offsetY);
                     ctx.lineTo((distance*j+size)+offsetX, (distance*i+(size/2))+offsetY);
@@ -149,11 +156,11 @@ function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
                     ctx.closePath();
                     break;
                 case Cell.UP:
-                    ctx.fillStyle = "orange";
-                    ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
-                    ctx.lineTo((distance*j+size)+offsetX, (distance*i)+offsetY);
-                    ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i+size)+offsetY);
-                    ctx.lineTo((distance*j)+offsetX, (distance*i)+offsetY);
+                    ctx.fillStyle = (mazeOnly ? "white" :"orange");
+                    ctx.moveTo((distance*j)+offsetX, (distance*i+size)+offsetY);
+                    ctx.lineTo((distance*j+size)+offsetX, (distance*i+size)+offsetY);
+                    ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i)+offsetY);
+                    ctx.lineTo((distance*j)+offsetX, (distance*i+size)+offsetY);
                     ctx.fill();
                     ctx.closePath();
                     break;
