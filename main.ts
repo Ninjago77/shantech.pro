@@ -8,16 +8,29 @@ enum Cell{
     UP = 4,
 }
 
+const randomInt = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
 
 class Maze {
     public matrix: Cell[][];
-    constructor(public height: number, public width: number) {
-        this.matrix = new Array((2*height)-1).fill(0).map(() => new Array((2*width)-1).fill(0).map(() => Cell.NONE));
-        for (var i = 0; i <= this.matrix.length; i+=2) {
-            for (var j = 0; j <= this.matrix[i].length; j+=2) {
-                this.matrix[i][j] = Cell.BLOCK;
+    public matrixHeight: number;
+    public matrixWidth: number;
+    constructor(public cellHeight: number, public cellWidth: number) {
+        this.matrixHeight = cellHeight*2 - 1;
+        this.matrixWidth = cellWidth*2 - 1;
+        this.matrix = new Array(this.matrixHeight).fill(0).map(() => new Array(this.matrixWidth).fill(0).map(() => Cell.NONE));
+        for (var i = 0; i < this.cellHeight; i++) {
+            for (var j = 0; j < this.cellWidth; j++) {
+                this.matrix[Maze.cellCoordinateToSize(i)][Maze.cellCoordinateToSize(j)] = Cell.BLOCK;
             }
         }
+    }
+    
+    static cellCoordinateToSize(pos: number) {
+        return pos*2; 
+    }
+    static sizeCoordinateToCell(pos: number) {
+        return pos/2; 
     }
 }
 
