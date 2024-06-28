@@ -1,8 +1,10 @@
+// npm install -D @types/node
 class Direction{
-    public UP:number = 0;
+    public NODE:number = 0;
     public DOWN:number = 1;
     public LEFT:number = 2;
     public RIGHT:number = 3;
+    public UP:number = 4;
 }
 
 class Cell {
@@ -14,10 +16,10 @@ class Cell {
 class Maze {
     public matrix: Cell[][];
     constructor(public height: number, public width: number) {
-        this.matrix = new Array((2*height)+1).fill(0).map(() => new Array((2*width)+1).fill(0).map(() => new Cell(null)));
-        for (var i = 0; i < this.matrix.length; i++) {
-            for (var j = 0; j < this.matrix[i].length; j++) {
-                this.matrix[i][j] = new Cell(null);
+        this.matrix = new Array((2*height)-1).fill(0).map(() => new Array((2*width)-1).fill(0).map(() => new Cell(null)));
+        for (var i = 0; i <= this.matrix.length; i+=2) {
+            for (var j = 0; j <= this.matrix[i].length; j+=2) {
+                this.matrix[i][j] = new Cell(Direction.NODE);
             }
         }
     }
