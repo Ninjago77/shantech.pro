@@ -72,6 +72,36 @@ class OriginShiftMaze {
         this.originCellX = newOriginCellX;
         this.originCellY = newOriginCellY;
     }
+
+    randomNewOrigin() {
+        let options: object[] = [];
+        if (this.originCellX != 0) {
+            options.push({
+                x: this.originCellX - 1,
+                y: this.originCellY,
+            });
+        }
+        if (this.originCellX != (this.cellWidth - 1)) {
+            options.push({
+                x: this.originCellX + 1,
+                y: this.originCellY,
+            });
+        }
+        if (this.originCellY != 0) {
+            options.push({
+                x: this.originCellX,
+                y: this.originCellY - 1,
+            });
+        }
+        if (this.originCellY != (this.cellHeight - 1)) {
+            options.push({
+                x: this.originCellX,
+                y: this.originCellY + 1,
+            });
+        }
+        let newOrigin = options[randomInt(0, options.length - 1)];
+        this.updateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+    }
 }
 
 function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
@@ -163,7 +193,7 @@ function draw() {
 
 function addEventListeners() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.addEventListener('click', (event) => mazeObj.updateFromNewOrigin(3,4));
+    canvas.addEventListener('click', (event) => mazeObj.randomNewOrigin());
 }
 
 resizeCanvas();
