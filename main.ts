@@ -62,7 +62,8 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
             ctx.beginPath();
             switch (k) {
                 case Cell.BLOCK:
-                    ctx.fillStyle = "black";
+                    ctx.fillStyle = (i == OriginShiftMaze.cellCoordinateToSize(mazeObj.originCellY) && j == OriginShiftMaze.cellCoordinateToSize(mazeObj.originCellX))
+                        ? "red" : "black";
                     ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
                     ctx.fill();
                     ctx.closePath();
@@ -95,7 +96,7 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
                     ctx.closePath();
                     break;
                 case Cell.UP:
-                    ctx.fillStyle = "red";
+                    ctx.fillStyle = "orange";
                     ctx.moveTo((distance*j)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j+size)+offsetX, (distance*i)+offsetY);
                     ctx.lineTo((distance*j+(size/2))+offsetX, (distance*i+size)+offsetY);
