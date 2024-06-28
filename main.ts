@@ -1,10 +1,10 @@
 // npm install -D @types/node
-class Direction{
-    public NODE:number = 0;
-    public DOWN:number = 1;
-    public LEFT:number = 2;
-    public RIGHT:number = 3;
-    public UP:number = 4;
+enum Direction{
+    NODE = 0,
+    DOWN = 1,
+    LEFT = 2,
+    RIGHT = 3,
+    UP = 4,
 }
 
 class Cell {
