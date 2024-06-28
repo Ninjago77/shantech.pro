@@ -30,13 +30,13 @@ class OriginShiftMaze {
         }
         for (var i = 0; i < this.cellHeight; i++) {
             for (var j = 0; j < this.matrixWidth; j++) {
-                if (this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][j] !== Cell.BLOCK) {
+                if (this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][j] != Cell.BLOCK) {
                     this.matrix[OriginShiftMaze.cellCoordinateToSize(i)][j] = Cell.RIGHT;
                 }
             }
         }
         for (var i = 0; i < this.matrixHeight; i++) {
-            if (this.matrix[i][this.matrixWidth-1] !== Cell.BLOCK) {
+            if (this.matrix[i][this.matrixWidth-1] != Cell.BLOCK) {
                 this.matrix[i][this.matrixWidth-1] = Cell.DOWN;
             }
         }
@@ -47,6 +47,36 @@ class OriginShiftMaze {
     }
     static sizeCoordinateToCell(pos: number) {
         return pos/2; 
+    }
+
+    originSizeX() {
+        return OriginShiftMaze.cellCoordinateToSize(this.originCellX);
+    }
+    originSizeY() {
+        return OriginShiftMaze.cellCoordinateToSize(this.originCellY);
+    }
+
+    updateFromNewOrigin() {
+        if (this.originCellX != 0) {
+            if (this.matrix[this.originSizeY()][this.originSizeX()-1] != Cell.RIGHT) {
+                this.matrix[this.originSizeY()][this.originSizeX()-1] = Cell.RIGHT;
+            }
+        }
+        if (this.originCellY != 0) {
+            if (this.matrix[this.originSizeY()-1][this.originSizeX()] != Cell.DOWN) {
+                this.matrix[this.originSizeY()-1][this.originSizeX()] = Cell.DOWN;
+            }
+        }
+        if (this.originCellX != this.cellWidth-1) {
+            if (this.matrix[this.originSizeY()][this.originSizeX()+1] != Cell.LEFT) {
+                this.matrix[this.originSizeY()][this.originSizeX()+1] = Cell.LEFT;
+            }
+        }
+        if (this.originCellY != this.cellHeight-1) {
+            if (this.matrix[this.originSizeY()+1][this.originSizeX()] != Cell.UP) {
+                this.matrix[this.originSizeY()+1][this.originSizeX()] = Cell.UP;
+            }
+        }
     }
 }
 
@@ -62,7 +92,7 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
             ctx.beginPath();
             switch (k) {
                 case Cell.BLOCK:
-                    ctx.fillStyle = (i == OriginShiftMaze.cellCoordinateToSize(mazeObj.originCellY) && j == OriginShiftMaze.cellCoordinateToSize(mazeObj.originCellX))
+                    ctx.fillStyle = (i == mazeObj.originSizeY() && j == mazeObj.originSizeX())
                         ? "red" : "black";
                     ctx.rect((distance*j)+offsetX, (distance*i)+offsetY, size, size);
                     ctx.fill();
