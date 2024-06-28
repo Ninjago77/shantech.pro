@@ -56,36 +56,29 @@ class OriginShiftMaze {
         return OriginShiftMaze.cellCoordinateToSize(this.originCellY);
     }
 
-    updateFromNewOrigin() {
-        if (this.originCellX != 0) {
-            if (this.matrix[this.originSizeY()][this.originSizeX()-1] != Cell.RIGHT) {
-                this.matrix[this.originSizeY()][this.originSizeX()-1] = Cell.RIGHT;
-            }
+    updateFromNewOrigin(newOriginCellX: number, newOriginCellY: number) {
+        if (this.originCellX-1 == newOriginCellX) {
+            this.matrix[this.originSizeY()][this.originSizeX()-1] = Cell.LEFT;
         }
-        if (this.originCellY != 0) {
-            if (this.matrix[this.originSizeY()-1][this.originSizeX()] != Cell.DOWN) {
-                this.matrix[this.originSizeY()-1][this.originSizeX()] = Cell.DOWN;
-            }
+        if (this.originCellX+1 == newOriginCellX) {
+            this.matrix[this.originSizeY()][this.originSizeX()+1] = Cell.RIGHT;
         }
-        if (this.originCellX != this.cellWidth-1) {
-            if (this.matrix[this.originSizeY()][this.originSizeX()+1] != Cell.LEFT) {
-                this.matrix[this.originSizeY()][this.originSizeX()+1] = Cell.LEFT;
-            }
+        if (this.originCellY-1 == newOriginCellY) {
+            this.matrix[this.originSizeY()-1][this.originSizeX()] = Cell.UP;
         }
-        if (this.originCellY != this.cellHeight-1) {
-            if (this.matrix[this.originSizeY()+1][this.originSizeX()] != Cell.UP) {
-                this.matrix[this.originSizeY()+1][this.originSizeX()] = Cell.UP;
-            }
+        if (this.originCellY+1 == newOriginCellY) {
+            this.matrix[this.originSizeY()+1][this.originSizeX()] = Cell.DOWN;
         }
+        this.originCellX = newOriginCellX;
+        this.originCellY = newOriginCellY;
     }
 }
 
-function drawMaze(ctx:CanvasRenderingContext2D) {
+function drawMaze(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
     const distance = 30;
     const size = 10;
     const offsetX = 50;
     const offsetY = 50;
-    var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
     for (var i = 0; i < mazeObj.matrixHeight; i++) {
         for (var j = 0; j < mazeObj.matrixWidth; j++) {
             let k = mazeObj.matrix[i][j];
@@ -145,19 +138,35 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
     }
 }
 
-function draw() {
-    var canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    if (canvas.getContext) {
-        var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
 
-        ctx.canvas.width  = window.innerWidth;
-        ctx.canvas.height = window.innerHeight;
+
+function resizeCanvas() {
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function draw() {
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    if (canvas.getContext) {
+        let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         drawMaze(
+            mazeObj,
             ctx,
         );
-
     }
+    requestAnimationFrame(draw);
 }
+
+function addEventListeners() {
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    canvas.addEventListener('click', (event) => mazeObj.updateFromNewOrigin(3,4));
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+addEventListeners();
 draw();
-window.addEventListener('resize', draw);
