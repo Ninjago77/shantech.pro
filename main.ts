@@ -51,6 +51,8 @@ class OriginShiftMaze {
 }
 
 function drawMaze(ctx:CanvasRenderingContext2D) {
+    const distance = 30;
+    const size = 10;
     var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
     for (var i = 0; i < mazeObj.matrixHeight; i++) {
         for (var j = 0; j < mazeObj.matrixWidth; j++) {
@@ -59,43 +61,43 @@ function drawMaze(ctx:CanvasRenderingContext2D) {
             switch (k) {
                 case Cell.BLOCK:
                     ctx.fillStyle = "black";
-                    ctx.rect(30*j, 30*i, 10, 10);
+                    ctx.rect(distance*j, distance*i, size, size);
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case Cell.DOWN:
                     ctx.fillStyle = "blue";
-                    ctx.moveTo(30*j, 30*i);
-                    ctx.lineTo(30*j, 30*i+10);
-                    ctx.lineTo(30*j+10, 30*i+(10/2));
-                    ctx.lineTo(30*j, 30*i);
+                    ctx.moveTo(distance*j, distance*i);
+                    ctx.lineTo(distance*j+size, distance*i);
+                    ctx.lineTo(distance*j+(size/2), distance*i+size);
+                    ctx.lineTo(distance*j, distance*i);
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case Cell.LEFT:
                     ctx.fillStyle = "green";
-                    ctx.moveTo(30*j, 30*i);
-                    ctx.lineTo(30*j, 30*i+10);
-                    ctx.lineTo(30*j+10, 30*i+(10/2));
-                    ctx.lineTo(30*j, 30*i);
+                    ctx.moveTo(distance*j+size, distance*i);
+                    ctx.lineTo(distance*j+size, distance*i+size);
+                    ctx.lineTo(distance*j, distance*i+(size/2));
+                    ctx.lineTo(distance*j+size, distance*i);
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case Cell.RIGHT:
                     ctx.fillStyle = "yellow";
-                    ctx.moveTo(30*j, 30*i);
-                    ctx.lineTo(30*j, 30*i+10);
-                    ctx.lineTo(30*j+10, 30*i+(10/2));
-                    ctx.lineTo(30*j, 30*i);
+                    ctx.moveTo(distance*j, distance*i);
+                    ctx.lineTo(distance*j, distance*i+size);
+                    ctx.lineTo(distance*j+size, distance*i+(size/2));
+                    ctx.lineTo(distance*j, distance*i);
                     ctx.fill();
                     ctx.closePath();
                     break;
                 case Cell.UP:
                     ctx.fillStyle = "red";
-                    ctx.moveTo(30*j, 30*i);
-                    ctx.lineTo(30*j, 30*i+10);
-                    ctx.lineTo(30*j+10, 30*i+(10/2));
-                    ctx.lineTo(30*j, 30*i);
+                    ctx.moveTo(distance*j, distance*i);
+                    ctx.lineTo(distance*j+size, distance*i);
+                    ctx.lineTo(distance*j+(size/2), distance*i+size);
+                    ctx.lineTo(distance*j, distance*i);
                     ctx.fill();
                     ctx.closePath();
                     break;
