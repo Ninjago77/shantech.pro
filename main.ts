@@ -18,16 +18,53 @@ class OriginShiftMaze {
         this.originX = this.width - 1;
         this.originY = this.height - 1;
         this.matrix = new Array(this.height).fill(0).map(() => new Array(this.width).fill(0).map(() => MazeNode.NONE));
-        for (var i = 0; i < this.height; i++) {
-            for (var j = 0; j < this.width; j++) {
-                this.matrix[i][j] = MazeNode.RIGHT;
+        // for (var i = 0; i < this.height; i++) {
+        //     for (var j = 0; j < this.width; j++) {
+        //         this.matrix[i][j] = MazeNode.RIGHT;
+        //     }
+        // }
+        // for (var i = 0; i < this.height; i++) {
+        //     this.matrix[i][this.width-1] = MazeNode.DOWN;
+        // }
+        if (this.height % 2 === 1 && this.width % 2 === 1) {
+            this.originX = Math.floor(this.width / 2);
+            this.originY = Math.floor(this.height / 2);
+        } else {
+            let possibleOrigins:object[] = [];
+            if (this.width % 2 === 0) {
+                possibleOrigins.push({ x: this.width / 2 - 1, y: Math.floor(this.height / 2) });
+                possibleOrigins.push({ x: this.width / 2, y: Math.floor(this.height / 2) });
             }
+            if (this.height % 2 === 0) {
+                possibleOrigins.push({ x: Math.floor(this.width / 2), y: this.height / 2 - 1 });
+                possibleOrigins.push({ x: Math.floor(this.width / 2), y: this.height / 2 });
+            }
+            let selectedOrigin = possibleOrigins[randomInt(0, possibleOrigins.length - 1)];
+            this.originX = selectedOrigin["x"];
+            this.originY = selectedOrigin["y"];
         }
-        for (var i = 0; i < this.height; i++) {
-            this.matrix[i][this.width-1] = MazeNode.DOWN;
+
+        this.matrix = new Array(this.height).fill(0).map(() => new Array(this.width).fill(0).map(() => MazeNode.NONE));
+        
+        // Point all nodes towards the origin
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                if (i < this.originY) {
+                    this.matrix[i][j] = MazeNode.DOWN;
+                } else if (i > this.originY) {
+                    this.matrix[i][j] = MazeNode.UP;
+                } else if (j < this.originX) {
+                    this.matrix[i][j] = MazeNode.RIGHT;
+                } else if (j > this.originX) {
+                    this.matrix[i][j] = MazeNode.LEFT;
+                } else {
+                    this.matrix[i][j] = MazeNode.NONE;
+                }
+            }
         }
         this.clearOriginDirections();
     }
+
     clearOriginDirections() {
         this.matrix[this.originY][this.originX] = MazeNode.NONE;
     }
@@ -147,13 +184,25 @@ class OriginShiftMaze {
         ctx.rect(x1,y1,x2-x1,y2-y1);
     }
 
-    static dimensionCalculate(height: number, width: number, unitDist: number, wall) : object {
+    static dimensionCalculate(height: number, width: number, unitDist: number) : object {
         return {
-            "height": height*unitDist+wall,
-            "width": width*unitDist+wall,
+            "height": height*unitDist,
+            "width": width*unitDist,
         };
     }
-    
+    autoStep() {
+        setInterval(() => {
+            this.step();
+        }, 250);
+    }
+
+    centerOffsetCalculate(maxHeight: number, maxWidth: number, unitDist:number=50):object {
+        return {
+            "offsetX": (maxWidth/2) - ((this.width*unitDist)/2),
+            "offsetY": (maxHeight/2) - ((this.height*unitDist)/2),
+        }; 
+    }
+
     
     drawMaze(ctx: CanvasRenderingContext2D, unitSize: number = 50, offsetX: number = 50, offsetY: number = 100, wall: number = 5) {
         // ctx.lineWidth = wall;
@@ -207,24 +256,27 @@ class OriginShiftMaze {
     }
 }
 
-var mazeObj = new OriginShiftMaze(10,20); // new Maze(5,5);
-let m = mazeObj.stepTimesCalculate();
-let n = 0;
+var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
+var offset = mazeObj.centerOffsetCalculate(window.innerHeight, window.innerWidth, 50);
+mazeObj.autoStep();
+// let m = mazeObj.stepTimesCalculate();
+// let n = 0;
 function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-    mazeObj.drawMaze(ctx);
-    mazeObj.drawPath(ctx);
-    if (n < m) {
-        mazeObj.step();
-        n++;
-    }
+    mazeObj.drawMaze(ctx, 50, offset["offsetX"], offset["offsetY"], 5);
+    mazeObj.drawPath(ctx, 30 , 50, offset["offsetX"], offset["offsetY"]);
+    // if (n < m) {
+    //     mazeObj.step();
+    //     n++;
+    // }
 }
 
 function resizeCanvas() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    offset = mazeObj.centerOffsetCalculate(canvas.height, canvas.width, 50)
 }
 
 
@@ -244,7 +296,7 @@ function draw() {
 
 function addEventListeners() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    // canvas.addEventListener('click', (event) => mazeObj.randomNewOrigin());
+    canvas.addEventListener('click', (event) => mazeObj.step());
 }
 
 resizeCanvas();
