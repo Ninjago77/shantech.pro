@@ -146,9 +146,17 @@ class OriginShiftMaze {
     static coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
         ctx.rect(x1,y1,x2-x1,y2-y1);
     }
+
+    static dimensionCalculate(height: number, width: number, unitDist: number, wall) : object {
+        return {
+            "height": height*unitDist+wall,
+            "width": width*unitDist+wall,
+        };
+    }
     
-    drawMaze(ctx: CanvasRenderingContext2D, unitSize: number = 50, offsetX: number = 50, offsetY: number = 100, wallWidth: number = 5) {
-        // ctx.lineWidth = wallWidth;
+    
+    drawMaze(ctx: CanvasRenderingContext2D, unitSize: number = 50, offsetX: number = 50, offsetY: number = 100, wall: number = 5) {
+        // ctx.lineWidth = wall;
         ctx.fillStyle = 'black';
         
         
@@ -163,32 +171,32 @@ class OriginShiftMaze {
                 if ((i == 0 || this.matrix[i - 1][j] != MazeNode.DOWN) && (cell != MazeNode.UP)) {
                     OriginShiftMaze.coordinateRect(
                         ctx,
-                        x - wallWidth, y - wallWidth,
-                        x + unitSize + wallWidth, y + wallWidth
+                        x - wall, y - wall,
+                        x + unitSize + wall, y + wall
                     );
                 }
                 // Draw the left wall
                 if ((j == 0 || this.matrix[i][j - 1] != MazeNode.RIGHT) && (cell != MazeNode.LEFT)) {
                     OriginShiftMaze.coordinateRect(
                         ctx,
-                        x - wallWidth, y - wallWidth,
-                        x + wallWidth, y + unitSize + wallWidth
+                        x - wall, y - wall,
+                        x + wall, y + unitSize + wall
                     );
                 }
                 // Draw the bottom wall
                 if ((i == this.height - 1 || this.matrix[i + 1][j] != MazeNode.UP) && (cell != MazeNode.DOWN)) {
                     OriginShiftMaze.coordinateRect(
                         ctx,
-                        x - wallWidth, y + unitSize - wallWidth,
-                        x + unitSize + wallWidth, y + unitSize + wallWidth
+                        x - wall, y + unitSize - wall,
+                        x + unitSize + wall, y + unitSize + wall
                     );
                 }
                 // Draw the right wall
                 if ((j == this.width - 1 || this.matrix[i][j + 1] != MazeNode.LEFT) && (cell != MazeNode.RIGHT)) {
                     OriginShiftMaze.coordinateRect(
                         ctx,
-                        x + unitSize - wallWidth, y - wallWidth,
-                        x + unitSize + wallWidth, y + unitSize + wallWidth
+                        x + unitSize - wall, y - wall,
+                        x + unitSize + wall, y + unitSize + wall
                     );
                 }
                 console.log(j,i, this.matrix[i][j]);
@@ -196,7 +204,7 @@ class OriginShiftMaze {
                 ctx.closePath();
             }
         }
-    }    
+    }
 }
 
 var mazeObj = new OriginShiftMaze(10,20); // new Maze(5,5);
