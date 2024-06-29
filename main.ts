@@ -88,123 +88,123 @@ class OriginShiftMaze {
         this.clearOriginDirections();
     }
 
-    drawPath(ctx:CanvasRenderingContext2D, unitSize:number=50, unitDist:number=50, offsetX:number=500, offsetY:number=100) {
+    drawPath(ctx: CanvasRenderingContext2D, unitSize: number = 30, unitDist: number = 50, offsetX: number = 50, offsetY: number = 100) {
         for (var i = 0; i < this.height; i++) {
             for (var j = 0; j < this.width; j++) {
                 let k = this.matrix[i][j];
+                let x = offsetX + (j * unitDist) + ((unitDist-unitSize)/2);
+                let y = offsetY + (i * unitDist) + ((unitDist-unitSize)/2);
+                
                 ctx.beginPath();
                 switch (k) {
                     case MazeNode.NONE:
-                        ctx.fillStyle = (i == this.originY && j == this.originX)
-                            ? "red" : "black";
-                        ctx.rect((unitDist*j)+offsetX, (unitDist*i)+offsetY, unitSize, unitSize);
+                        ctx.fillStyle = (i == this.originY && j == this.originX) ? "red" : "black";
+                        ctx.rect(x, y, unitSize, unitSize);
                         ctx.fill();
-                        ctx.closePath();
                         break;
                     case MazeNode.DOWN:
-                        ctx.fillStyle = ("blue");
-                        ctx.moveTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
-                        ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
-                        ctx.lineTo((unitDist*j+(unitSize/2))+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.lineTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
-                        ctx.fill();
+                        ctx.fillStyle = "blue";
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x + unitSize, y);
+                        ctx.lineTo(x + unitSize / 2, y + unitSize);
                         ctx.closePath();
+                        ctx.fill();
                         break;
                     case MazeNode.LEFT:
-                        ctx.fillStyle = ("green");
-                        ctx.moveTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
-                        ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+(unitSize/2))+offsetY);
-                        ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i)+offsetY);
-                        ctx.fill();
+                        ctx.fillStyle = "green";
+                        ctx.moveTo(x + unitSize, y);
+                        ctx.lineTo(x + unitSize, y + unitSize);
+                        ctx.lineTo(x, y + unitSize / 2);
                         ctx.closePath();
+                        ctx.fill();
                         break;
                     case MazeNode.RIGHT:
-                        ctx.fillStyle = ("yellow");
-                        ctx.moveTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
-                        ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+(unitSize/2))+offsetY);
-                        ctx.lineTo((unitDist*j)+offsetX, (unitDist*i)+offsetY);
-                        ctx.fill();
+                        ctx.fillStyle = "yellow";
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x, y + unitSize);
+                        ctx.lineTo(x + unitSize, y + unitSize / 2);
                         ctx.closePath();
+                        ctx.fill();
                         break;
                     case MazeNode.UP:
-                        ctx.fillStyle = ("orange");
-                        ctx.moveTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.lineTo((unitDist*j+unitSize)+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.lineTo((unitDist*j+(unitSize/2))+offsetX, (unitDist*i)+offsetY);
-                        ctx.lineTo((unitDist*j)+offsetX, (unitDist*i+unitSize)+offsetY);
-                        ctx.fill();
+                        ctx.fillStyle = "orange";
+                        ctx.moveTo(x, y + unitSize);
+                        ctx.lineTo(x + unitSize, y + unitSize);
+                        ctx.lineTo(x + unitSize / 2, y);
                         ctx.closePath();
+                        ctx.fill();
                         break;
                     default:
                         ctx.fillStyle = "white";
                         ctx.fill();
-                        ctx.closePath();
                         break;
                 }
-    
-            }
-        }
-    }
-    drawMaze(ctx:CanvasRenderingContext2D, unitSize:number=50, offsetX:number=500, offsetY:number=100, wallWidth:number=5) {
-        ctx.beginPath();
-        ctx.fillStyle = ("white");
-        ctx.rect(offsetX-wallWidth, offsetY-wallWidth, (unitSize*this.width-1)+wallWidth, (unitSize*this.height-1)+wallWidth);
-        ctx.fill();
-        ctx.closePath();
-        let emptyUnitSize = unitSize - (wallWidth * 2);
-        for (var i = 0; i < this.height; i++) {
-            for (var j = 0; j < this.width; j++) {
-                let k = this.matrix[i][j];
-                ctx.beginPath();
-                ctx.fillStyle = ("black");
-                ctx.rect((unitSize*j+wallWidth)+offsetX, (unitSize*i+wallWidth)+offsetY, emptyUnitSize, emptyUnitSize);
-                ctx.fill();
-                switch (k) {
-                    case MazeNode.NONE:
-                        ctx.fillStyle = "red";
-                        ctx.rect((unitSize*j)+offsetX, (unitSize*i)+offsetY, unitSize, unitSize);
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                    case MazeNode.DOWN:
-                        ctx.rect((unitSize*j+wallWidth)+offsetX, (unitSize*i-wallWidth+unitSize)+offsetY, emptyUnitSize, wallWidth+emptyUnitSize);
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                    case MazeNode.LEFT:
-                        ctx.rect((unitSize*j+wallWidth-unitSize)+offsetX, (unitSize*i+wallWidth)+offsetY, wallWidth+emptyUnitSize, emptyUnitSize);
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                    case MazeNode.RIGHT:
-                        ctx.rect((unitSize*j-wallWidth+unitSize)+offsetX, (unitSize*i+wallWidth)+offsetY, wallWidth+emptyUnitSize, emptyUnitSize);
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                    case MazeNode.UP:
-                        ctx.rect((unitSize*j+wallWidth)+offsetX, (unitSize*i+wallWidth-unitSize)+offsetY, emptyUnitSize, wallWidth+emptyUnitSize);
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                    default:
-                        ctx.fillStyle = "white";
-                        ctx.fill();
-                        ctx.closePath();
-                        break;
-                }
-    
             }
         }
     }
 
+    static coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
+        ctx.rect(x1,y1,x2-x1,y2-y1);
+    }
+    
+    drawMaze(ctx: CanvasRenderingContext2D, unitSize: number = 50, offsetX: number = 50, offsetY: number = 100, wallWidth: number = 5) {
+        // ctx.lineWidth = wallWidth;
+        ctx.fillStyle = 'black';
+        
+        
+        for (var i = 0; i < this.height; i++) {
+            for (var j = 0; j < this.width; j++) {
+                let x = offsetX + j * unitSize;
+                let y = offsetY + i * unitSize;
+                let cell = this.matrix[i][j];
+    
+                ctx.beginPath();
+                // Draw the top wall
+                if ((i == 0 || this.matrix[i - 1][j] != MazeNode.DOWN) && (cell != MazeNode.UP)) {
+                    OriginShiftMaze.coordinateRect(
+                        ctx,
+                        x - wallWidth, y - wallWidth,
+                        x + unitSize + wallWidth, y + wallWidth
+                    );
+                }
+                // Draw the left wall
+                if ((j == 0 || this.matrix[i][j - 1] != MazeNode.RIGHT) && (cell != MazeNode.LEFT)) {
+                    OriginShiftMaze.coordinateRect(
+                        ctx,
+                        x - wallWidth, y - wallWidth,
+                        x + wallWidth, y + unitSize + wallWidth
+                    );
+                }
+                // Draw the bottom wall
+                if ((i == this.height - 1 || this.matrix[i + 1][j] != MazeNode.UP) && (cell != MazeNode.DOWN)) {
+                    OriginShiftMaze.coordinateRect(
+                        ctx,
+                        x - wallWidth, y + unitSize - wallWidth,
+                        x + unitSize + wallWidth, y + unitSize + wallWidth
+                    );
+                }
+                // Draw the right wall
+                if ((j == this.width - 1 || this.matrix[i][j + 1] != MazeNode.LEFT) && (cell != MazeNode.RIGHT)) {
+                    OriginShiftMaze.coordinateRect(
+                        ctx,
+                        x + unitSize - wallWidth, y - wallWidth,
+                        x + unitSize + wallWidth, y + unitSize + wallWidth
+                    );
+                }
+                console.log(j,i, this.matrix[i][j]);
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }    
 }
 
-var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
+var mazeObj = new OriginShiftMaze(10,20); // new Maze(5,5);
 let m = mazeObj.stepTimesCalculate();
 let n = 0;
 function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
     mazeObj.drawMaze(ctx);
     mazeObj.drawPath(ctx);
     if (n < m) {
