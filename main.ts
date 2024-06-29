@@ -10,7 +10,7 @@ enum MazeNode{
 const randomInt = (min, max) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
-class OriginShiftMaze {
+class OriginShiftMaze { // CaptainLuma's Algorithm
     public matrix: MazeNode[][];
     public originX: number;
     public originY: number;
@@ -137,6 +137,7 @@ class OriginShiftMaze {
                     case MazeNode.NONE:
                         ctx.fillStyle = (i == this.originY && j == this.originX) ? "red" : "black";
                         ctx.rect(x, y, unitSize, unitSize);
+                        ctx.closePath();
                         ctx.fill();
                         break;
                     case MazeNode.DOWN:
@@ -184,10 +185,17 @@ class OriginShiftMaze {
         ctx.rect(x1,y1,x2-x1,y2-y1);
     }
 
-    static dimensionCalculate(height: number, width: number, unitDist: number) : object {
+    static dimensionCalculate(height: number, width: number, unitDist: number=50, wall: number=5) : object {
         return {
-            "height": height*unitDist,
-            "width": width*unitDist,
+            "height": (height*unitDist)+(wall*2),
+            "width": (width*unitDist)+(wall*2),
+        };
+    }
+
+    static reverseDimensionCalculate(height: number, width: number, unitDist: number=50, wall: number=5) : object {
+        return {
+            "height": (height-(wall*2))/unitDist,
+            "width": (width-(wall*2))/unitDist,
         };
     }
     autoStep() {
@@ -248,7 +256,7 @@ class OriginShiftMaze {
                         x + unitSize + wall, y + unitSize + wall
                     );
                 }
-                console.log(j,i, this.matrix[i][j]);
+                // console.log(j,i, this.matrix[i][j]);
                 ctx.fill();
                 ctx.closePath();
             }
@@ -256,14 +264,24 @@ class OriginShiftMaze {
     }
 }
 
-var mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
-var offset = mazeObj.centerOffsetCalculate(window.innerHeight, window.innerWidth, 50);
-mazeObj.autoStep();
+var mazeObj:OriginShiftMaze;
+var offset:object;
+// mazeObj.autoStep();
 // let m = mazeObj.stepTimesCalculate();
 // let n = 0;
 function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+
+    let k = OriginShiftMaze.dimensionCalculate(mazeObj.height,mazeObj.width);
+    let l  = OriginShiftMaze.reverseDimensionCalculate(window.innerHeight,window.innerWidth);
+    ctx.beginPath();
+    ctx.fillStyle = "red";
+    ctx.rect(0, 0, k["width"], k["height"]);
+    ctx.closePath();
+    ctx.fill();
+    console.log(l);
+
     mazeObj.drawMaze(ctx, 50, offset["offsetX"], offset["offsetY"], 5);
     mazeObj.drawPath(ctx, 30 , 50, offset["offsetX"], offset["offsetY"]);
     // if (n < m) {
@@ -276,7 +294,8 @@ function resizeCanvas() {
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    offset = mazeObj.centerOffsetCalculate(canvas.height, canvas.width, 50)
+    // offset = mazeObj.centerOffsetCalculate(canvas.height, canvas.width, 50);
+    // console.log(offset);
 }
 
 
@@ -295,11 +314,14 @@ function draw() {
 }
 
 function addEventListeners() {
+    window.addEventListener('resize', resizeCanvas);
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     canvas.addEventListener('click', (event) => mazeObj.step());
 }
 
 resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+mazeObj = new OriginShiftMaze(5,5); // new Maze(5,5);
+offset = mazeObj.centerOffsetCalculate(window.innerHeight, window.innerWidth, 50);
+// mazeObj.autoStep();
 addEventListeners();
 draw();
