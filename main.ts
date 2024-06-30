@@ -74,7 +74,7 @@ function coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x
     ctx.beginPath();
     ctx.rect(x1,y1,x2-x1,y2-y1);
     ctx.fill();
-    ctx.stroke();
+    ctx.closePath();
 }
 
 function coordinateDirectionUnitTriangle(ctx: CanvasRenderingContext2D, dir: MazeNode, fillStyle: string | CanvasGradient | CanvasPattern, x1: number, y1: number, x2: number, y2: number) {
@@ -384,7 +384,15 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         }
     }
     drawRoute(ctx: CanvasRenderingContext2D, unitSize: number, unitStartSize: number, unitDist: number, wall: number, offsetX: number, offsetY: number, startX: number = 0, startY: number = 0, endX: number = this.width-1, endY: number = this.height-1):{x:number, y:number}[] {
+        
+        ctx.beginPath();
+        ctx.fillStyle = hoverColor;
+        ctx.rect(offsetX + (startX * unitDist) + wall, offsetY + (startY * unitDist) + wall, unitStartSize - (wall*2), unitStartSize - (wall*2));
+        ctx.fill();
+        ctx.closePath();
+
         this.drawOrigin(ctx, unitSize, unitDist, offsetX, offsetY, [], endX, endY, true); // fake origin
+
         if ((startX == endX) && (startY == endY)) {
             return [{"x": startX, "y": startY}];
         }
@@ -501,12 +509,6 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
 
             coordinateDirectionUnitTriangle(ctx, k, pathColor, x, y, x + unitSize, y + unitSize);
         }
-
-        ctx.beginPath();
-        ctx.fillStyle = hoverColor;
-        ctx.rect(offsetX + (startX * unitDist) + wall, offsetY + (startY * unitDist) + wall, unitStartSize - (wall*2), unitStartSize - (wall*2));
-        ctx.fill();
-        ctx.closePath();
 
         let k = this.matrix[startY][startX];
         let x = offsetX + (startX * unitDist) + ((unitDist-unitSize)/2);
