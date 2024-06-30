@@ -71,7 +71,42 @@ function isCoordinateInList(target: { x: number, y: number }, arr: { x: number, 
 }
 
 function coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
+    ctx.beginPath();
     ctx.rect(x1,y1,x2-x1,y2-y1);
+    ctx.fill();
+    ctx.stroke();
+}
+
+function coordinateDirectionUnitTriangle(ctx: CanvasRenderingContext2D, dir: MazeNode, fillStyle: string | CanvasGradient | CanvasPattern, x1: number, y1: number, x2: number, y2: number) {
+    ctx.beginPath();
+    ctx.fillStyle = fillStyle;
+    switch (dir) {
+        case MazeNode.DOWN:
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y1);
+            ctx.lineTo(x1 + ((x2-x1) / 2), y2);
+            break;
+        case MazeNode.LEFT:
+            ctx.moveTo(x2, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x1, y1 + ((y2-y1) / 2));
+            break;
+        case MazeNode.RIGHT:
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x1, y2);
+            ctx.lineTo(x2, y1 + ((y2-y1) / 2));
+            break;
+        case MazeNode.UP:
+            ctx.moveTo(x1, y2);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x1 + ((x2-x1) / 2), y1);
+            break;
+        default:
+            ctx.fillStyle = "white";
+            break;
+    }
+    ctx.closePath();
+    ctx.fill();
 }
 
 function isUserAgentMobile(str) {
@@ -150,7 +185,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
     clearOriginDirections() {
         this.matrix[this.originY][this.originX] = MazeNode.NONE;
     }
-    updateFromNewOrigin(newOriginCellX: number, newOriginCellY: number) {
+    changeStateFromNewOrigin(newOriginCellX: number, newOriginCellY: number) {
         if (this.originX-1 == newOriginCellX) {
             this.matrix[this.originY][this.originX] = MazeNode.LEFT;
         }
@@ -204,7 +239,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
     step() {
         if (!this.living) {return;}
         let newOrigin = this.randomNewOrigin();
-        this.updateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+        this.changeStateFromNewOrigin(newOrigin['x'], newOrigin['y']);
         this.clearOriginDirections();
     }
 
@@ -265,7 +300,6 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 let y = offsetY + i * unitSize;
                 let cell = this.matrix[i][j];
     
-                ctx.beginPath();
                 // Draw the top wall
                 if ((i == 0 || this.matrix[i - 1][j] != MazeNode.DOWN) && (cell != MazeNode.UP)) {
                     coordinateRect(
@@ -299,8 +333,6 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                     );
                 }
                 // console.log(j,i, this.matrix[i][j]);
-                ctx.fill();
-                ctx.closePath();
             }
         }
     }
@@ -328,51 +360,26 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 let x = offsetX + (j * unitDist) + ((unitDist-unitSize)/2);
                 let y = offsetY + (i * unitDist) + ((unitDist-unitSize)/2);
                 
-                ctx.beginPath();
+                let fillStyle: string | CanvasGradient | CanvasPattern = "";
                 switch (k) {
-                    case MazeNode.NONE:
-                        // ctx.fillStyle =  originColor;
-                        // ctx.rect(x, y, unitSize, unitSize);
-                        // ctx.closePath();
-                        // ctx.fill();
-                        break;
                     case MazeNode.DOWN:
-                        ctx.fillStyle = debugColors ? "navy" : nodeColor;
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(x + unitSize, y);
-                        ctx.lineTo(x + unitSize / 2, y + unitSize);
-                        ctx.closePath();
-                        ctx.fill();
+                        fillStyle = debugColors ? "navy" : nodeColor;
                         break;
                     case MazeNode.LEFT:
-                        ctx.fillStyle = debugColors ? "purple" : nodeColor;
-                        ctx.moveTo(x + unitSize, y);
-                        ctx.lineTo(x + unitSize, y + unitSize);
-                        ctx.lineTo(x, y + unitSize / 2);
-                        ctx.closePath();
-                        ctx.fill();
+                        fillStyle = debugColors ? "purple" : nodeColor;
                         break;
                     case MazeNode.RIGHT:
-                        ctx.fillStyle = debugColors ? "teal" : nodeColor;
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(x, y + unitSize);
-                        ctx.lineTo(x + unitSize, y + unitSize / 2);
-                        ctx.closePath();
-                        ctx.fill();
+                        fillStyle = debugColors ? "teal" : nodeColor;
                         break;
                     case MazeNode.UP:
-                        ctx.fillStyle = debugColors ? "olive" : nodeColor;
-                        ctx.moveTo(x, y + unitSize);
-                        ctx.lineTo(x + unitSize, y + unitSize);
-                        ctx.lineTo(x + unitSize / 2, y);
-                        ctx.closePath();
-                        ctx.fill();
+                        fillStyle = debugColors ? "olive" : nodeColor;
                         break;
                     default:
-                        ctx.fillStyle = "white";
-                        ctx.fill();
+                        fillStyle = "white";
                         break;
                 }
+
+                coordinateDirectionUnitTriangle(ctx, k, fillStyle, x, y, x + unitSize, y + unitSize);
             }
         }
     }
@@ -464,38 +471,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 continue;
             }
             
-            ctx.beginPath();
-            switch (k) {
-                case MazeNode.DOWN:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize / 2, y + unitSize);
-                    break;
-                case MazeNode.LEFT:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x, y + unitSize / 2);
-                    break;
-                case MazeNode.RIGHT:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize / 2);
-                    break;
-                case MazeNode.UP:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x + unitSize / 2, y);
-                    break;
-                default:
-                    ctx.fillStyle = "white";
-                    break;
-            }
-            ctx.closePath();
-            ctx.fill();
+            coordinateDirectionUnitTriangle(ctx, k, pathColor, x, y, x + unitSize, y + unitSize);
         }
         for (var e = 0; e < endToOrigin2.length; e++) {
             let i = endToOrigin2[e]["y"];
@@ -523,42 +499,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 k = MazeNode.DOWN;
             }
 
-            ctx.beginPath();
-            switch (k) {
-                case MazeNode.DOWN:
-                    ctx.fillStyle = pathColor;
-                    // if (e==1) {ctx.fillStyle = "white";}
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize / 2, y + unitSize);
-                    break;
-                case MazeNode.LEFT:
-                    ctx.fillStyle = pathColor;
-                    // if (e==1) {ctx.fillStyle = "white";}
-                    ctx.moveTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x, y + unitSize / 2);
-                    break;
-                case MazeNode.RIGHT:
-                    ctx.fillStyle = pathColor;
-                    // if (e==1) {ctx.fillStyle = "white";}
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize / 2);
-                    break;
-                case MazeNode.UP:
-                    ctx.fillStyle = pathColor;
-                    // if (e==1) {ctx.fillStyle = "white";}
-                    ctx.moveTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x + unitSize / 2, y);
-                    break;
-                default:
-                    ctx.fillStyle = "white";
-                    break;
-            }
-            ctx.closePath();
-            ctx.fill();
+            coordinateDirectionUnitTriangle(ctx, k, pathColor, x, y, x + unitSize, y + unitSize);
         }
 
         ctx.beginPath();
@@ -586,35 +527,8 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 k = MazeNode.DOWN;
             }
         }        
-        ctx.beginPath();
-        ctx.fillStyle = pathColor;
-        switch (k) {
-            case MazeNode.DOWN:
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + unitSize, y);
-                ctx.lineTo(x + unitSize / 2, y + unitSize);
-                break;
-            case MazeNode.LEFT:
-                ctx.moveTo(x + unitSize, y);
-                ctx.lineTo(x + unitSize, y + unitSize);
-                ctx.lineTo(x, y + unitSize / 2);
-                break;
-            case MazeNode.RIGHT:
-                ctx.moveTo(x, y);
-                ctx.lineTo(x, y + unitSize);
-                ctx.lineTo(x + unitSize, y + unitSize / 2);
-                break;
-            case MazeNode.UP:
-                ctx.moveTo(x, y + unitSize);
-                ctx.lineTo(x + unitSize, y + unitSize);
-                ctx.lineTo(x + unitSize / 2, y);
-                break;
-            default:
-                ctx.fillStyle = "white";
-                break;
-        }
-        ctx.fill();
-        ctx.closePath();
+
+        coordinateDirectionUnitTriangle(ctx, k, pathColor, x, y, x + unitSize, y + unitSize);
 
         let rV = [
             ...startToOrigin2,
@@ -688,38 +602,8 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             // console.log(trueMaster,trueMasterDirection);
             let x = offsetX + (trueMaster.x * unitDist) + ((unitDist-unitSize)/2);
             let y = offsetY + (trueMaster.y * unitDist) + ((unitDist-unitSize)/2);
-            ctx.beginPath();
-            switch (trueMasterDirection) {
-                case MazeNode.DOWN:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize / 2, y + unitSize);
-                    break;
-                case MazeNode.LEFT:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x + unitSize, y);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x, y + unitSize / 2);
-                    break;
-                case MazeNode.RIGHT:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize / 2);
-                    break;
-                case MazeNode.UP:
-                    ctx.fillStyle = pathColor;
-                    ctx.moveTo(x, y + unitSize);
-                    ctx.lineTo(x + unitSize, y + unitSize);
-                    ctx.lineTo(x + unitSize / 2, y);
-                    break;
-                default:
-                    ctx.fillStyle = "white";
-                    break;
-            }
-            ctx.closePath();
-            ctx.fill();
+
+            coordinateDirectionUnitTriangle(ctx, trueMasterDirection, pathColor, x, y, x + unitSize, y + unitSize);
         }
 
         return trueMaster;
