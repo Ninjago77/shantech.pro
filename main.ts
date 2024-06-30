@@ -702,7 +702,7 @@ function addEventListeners() {
     })
     let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     window.addEventListener('mousedown', (event) => mazeObj.living = false);
-    window.addEventListener('mouseup', (event) => mazeObj.living = true);
+    window.addEventListener('mouseup', (event) => {mazeObj.living = true;});
     window.addEventListener('contextmenu', (event) => {
         event.preventDefault();
         let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, 5, offset);
