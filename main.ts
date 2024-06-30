@@ -35,6 +35,7 @@ var cursorX:number = -1;
 var cursorY:number = -1;
 
 var globalOriginTrack = false;
+var visibleOverlay = true;
 
 // When both multipliers are the same, the quality looks amazing!!!
 const iconMultiplier = 3;
@@ -851,6 +852,16 @@ function addEventListeners() {
                 mazeObj.trackOriginX = c["x"];
                 mazeObj.trackOriginY = c["y"];
                 //idisidj print(jfij , [87ddd + for I in range() i kill you pretty quickly])
+            }
+            if (e.key == "h" || e.code == "KeyH") {
+                visibleOverlay = !visibleOverlay;
+                if (visibleOverlay) {
+                    (document.getElementsByClassName("content")[0] as HTMLDivElement).style.display = "block";
+                    (document.getElementsByClassName("overlay")[0] as HTMLDivElement).style.backgroundColor = "rgba(0,0,0,0.35)";
+                } else {
+                    (document.getElementsByClassName("content")[0] as HTMLDivElement).style.display = "none";
+                    (document.getElementsByClassName("overlay")[0] as HTMLDivElement).style.backgroundColor = "rgba(0,0,0,0)";
+                }
             }
             
         });
