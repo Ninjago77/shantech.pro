@@ -15,7 +15,7 @@
 				height: 100%;
 				overflow: hidden;
 				background-color: #1c1c24;
-				cursor: cell;
+				cursor: url(./cursor.png),16, 16, auto;
 			}
 			canvas {
 				display: block;
@@ -44,14 +44,6 @@
 				padding: 20px;
 				font-size: 24px;
 			}
-			/* #square {
-				position: fixed;
-				width: 25px;  
-				height: 25px; 
-				background-color: blue; 
-				pointer-events: none;   
-				z-index: 4;
-			} */
 		</style>
 	</head>
 	<body>
@@ -67,23 +59,5 @@
 		</div>
 		<div id="square"></div>
 		<script src="build.js" type="application/x-javascript"></script>
-		<!-- <script>
-			const cursorSquare = document.getElementById('square');
-			
-			document.addEventListener('mousemove', (e) => {
-				cursorSquare.style.left = `${e.clientX - 10}px`;
-				cursorSquare.style.top = `${e.clientY - 10}px`;
-			});
-
-			// If you want to change the color based on certain conditions
-			function changeCursorColor(color) {
-				cursorSquare.style.backgroundColor = color;
-			}
-
-			// Example: Change color on mouse click
-			document.addEventListener('click', () => {
-				changeCursorColor('blue'); // Change to blue on click
-			});
-		</script> -->
 	</body>
 </html>
