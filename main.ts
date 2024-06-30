@@ -33,6 +33,7 @@ var globalEndY:number = 0;
 var cursorX:number = -1;
 var cursorY:number = -1;
 
+// When both multipliers are the same, the quality looks amazing!!!
 const iconMultiplier = 3;
 const resolutionGraphicsMultiplier = 3;
 
@@ -512,7 +513,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 continue;
             }
             
-            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, pathColor, x, y, x + unitSize, y + unitSize]);
+            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k,(i == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
         }
         for (var e = 0; e < endToOrigin2.length; e++) {
             let i = endToOrigin2[e]["y"];
@@ -540,7 +541,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 k = MazeNode.DOWN;
             }
 
-            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, pathColor, x, y, x + unitSize, y + unitSize]);
+            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, (i == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
         }
 
         let k = this.matrix[startY][startX];
@@ -563,7 +564,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             }
         }        
 
-        this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, pathColor, x, y, x + unitSize, y + unitSize]);
+        this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, (startX == this.originX && startY == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
 
         let rV = [
             ...startToOrigin2,
@@ -638,7 +639,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             let x = offsetX + (trueMaster.x * unitDist) + ((unitDist-unitSize)/2);
             let y = offsetY + (trueMaster.y * unitDist) + ((unitDist-unitSize)/2);
 
-            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, trueMasterDirection, pathColor, x, y, x + unitSize, y + unitSize]);
+            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, trueMasterDirection,(trueMaster.x == this.originX && trueMaster.y == this.originY) ? originColor : pathColor, x, y, x + unitSize, y + unitSize]);
         }
 
         return trueMaster;
