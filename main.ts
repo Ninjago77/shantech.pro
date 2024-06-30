@@ -16,7 +16,7 @@ enum MazeNode{
 
 const wallColor = "#464854";
 const fakeOriginColor = "#6fabb0";
-const originColor = "#3c53c7";
+const originColor = "#3d4fad";
 const nodeColor = "#485e46";
 const pathColor = "#70b064";
 const BGColor = "#1c1c24";
@@ -33,10 +33,12 @@ var globalEndY:number = 0;
 var cursorX:number = -1;
 var cursorY:number = -1;
 
-const globalUnit = 50*3;
-const globalWall = 5*3;
-const globalPath = 10*3;
-const globalRoute = 25*3;
+const multiplier = 1;
+
+const globalUnit = 50*multiplier;
+const globalWall = 5*multiplier;
+const globalPath = 10*multiplier;
+const globalRoute = 25*multiplier;
 
 // const globalUnit = 35;
 // const globalWall = 3;
@@ -64,6 +66,22 @@ function removeCommonCoordinates(e: { x: number, y: number }[], f: { x: number, 
 function coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
     ctx.rect(x1,y1,x2-x1,y2-y1);
 }
+
+function isUserAgentMobile(str) {
+    return /\b(BlackBerry|webOS|iPhone|IEMobile)\b/i.test(str) ||
+      /\b(Android|Windows Phone|iPad|iPod)\b/i.test(str)
+}
+  
+function isMobile() {
+    if ('maxTouchPoints' in navigator) return navigator.maxTouchPoints > 0;
+
+    if ('matchMedia' in window) return !!matchMedia('(pointer:coarse)').matches;
+
+    if ('orientation' in window) return true;
+
+    return isUserAgentMobile((navigator as Navigator).userAgent);
+}
+  
 
 class OriginShiftMaze { // CaptainLuma's Algorithm
     public matrix: MazeNode[][];
@@ -468,7 +486,8 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         for (var e = 0; e < endToOrigin2.length; e++) {
             let i = endToOrigin2[e]["y"];
             let j = endToOrigin2[e]["x"];
-            let k = this.matrix[i][j];
+            // let k = this.matrix[i][j];
+            let k:MazeNode = MazeNode.NONE; 
             let x = offsetX + (j * unitDist) + ((unitDist-unitSize)/2);
             let y = offsetY + (i * unitDist) + ((unitDist-unitSize)/2);
 
@@ -477,43 +496,43 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             }
             let n = endToOrigin2[e-1];
 
-            if (j == n["x"]-1) {
+            if (j-1 == n["x"]) {
                 k = MazeNode.LEFT;
             }
-            if (j == n["x"]+1) {
+            if (j+1 == n["x"]) {
                 k = MazeNode.RIGHT;
             }
-            if (i == n["y"]-1) {
+            if (i-1 == n["y"]) {
                 k = MazeNode.UP;
             }
-            if (i == n["y"]+1) {
+            if (i+1 == n["y"]) {
                 k = MazeNode.DOWN;
             }
 
             ctx.beginPath();
             switch (k) {
-                case MazeNode.UP:
+                case MazeNode.DOWN:
                     ctx.fillStyle = pathColor;
                     // if (e==1) {ctx.fillStyle = "white";}
                     ctx.moveTo(x, y);
                     ctx.lineTo(x + unitSize, y);
                     ctx.lineTo(x + unitSize / 2, y + unitSize);
                     break;
-                case MazeNode.RIGHT:
+                case MazeNode.LEFT:
                     ctx.fillStyle = pathColor;
                     // if (e==1) {ctx.fillStyle = "white";}
                     ctx.moveTo(x + unitSize, y);
                     ctx.lineTo(x + unitSize, y + unitSize);
                     ctx.lineTo(x, y + unitSize / 2);
                     break;
-                case MazeNode.LEFT:
+                case MazeNode.RIGHT:
                     ctx.fillStyle = pathColor;
                     // if (e==1) {ctx.fillStyle = "white";}
                     ctx.moveTo(x, y);
                     ctx.lineTo(x, y + unitSize);
                     ctx.lineTo(x + unitSize, y + unitSize / 2);
                     break;
-                case MazeNode.DOWN:
+                case MazeNode.UP:
                     ctx.fillStyle = pathColor;
                     // if (e==1) {ctx.fillStyle = "white";}
                     ctx.moveTo(x, y + unitSize);
@@ -729,20 +748,25 @@ function draw() {
 function addEventListeners() {
     // console.log("height,width",mazeObj.height, mazeObj.width);
     window.addEventListener('resize', resizeCanvas);
-    document.addEventListener("mousemove" ,(event) => {
-        cursorX = event.clientX;
-        cursorY = event.clientY;
-    })
-    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    window.addEventListener('mousedown', (event) => mazeObj.living = false);
-    window.addEventListener('mouseup', (event) => {mazeObj.living = true;});
-    window.addEventListener("keyup", (e: KeyboardEvent) => {
-        if (e.key == " " || e.code == "Space") {            
-            let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, 5, offset);
-            globalEndX = c["x"];
-            globalEndY = c["y"];
-        }
-    });
+    if (!isMobile()) {
+        document.addEventListener("mousemove" ,(event) => {
+            cursorX = event.clientX;
+            cursorY = event.clientY;
+        })
+        let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        window.addEventListener('mousedown', (event) => mazeObj.living = false);
+        window.addEventListener('mouseup', (event) => {mazeObj.living = true;});
+        window.addEventListener("keyup", (e: KeyboardEvent) => {
+            if (e.key == " " || e.code == "Space") {            
+                let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, 5, offset);
+                globalEndX = c["x"];
+                globalEndY = c["y"];
+            }
+        });
+    } else {
+        let content = document.getElementsByClassName("content")[0] as HTMLDivElement;
+        content.style.display = "none";
+    }
     // window.oncontextmenu = (event) => {
     //     event.preventDefault();
     //     let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, 5, offset);
