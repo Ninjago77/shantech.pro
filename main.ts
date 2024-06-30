@@ -513,7 +513,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 continue;
             }
             
-            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k,(i == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
+            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k,(j == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
         }
         for (var e = 0; e < endToOrigin2.length; e++) {
             let i = endToOrigin2[e]["y"];
@@ -541,7 +541,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 k = MazeNode.DOWN;
             }
 
-            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, (i == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
+            this.addToDrawQueue(coordinateDirectionUnitTriangle,[ctx, k, (j == this.originX && i == this.originY) ? originColor :  pathColor, x, y, x + unitSize, y + unitSize]);
         }
 
         let k = this.matrix[startY][startX];
