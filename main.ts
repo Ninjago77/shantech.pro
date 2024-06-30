@@ -16,7 +16,7 @@ enum MazeNode{
 
 const wallColor = "#464854";
 const fakeOriginColor = "#6fabb0";
-const originColor = "#3d4fad";
+const originColor = "#2f28fa";
 const nodeColor = "#485e46";
 const pathColor = "#70b064";
 const BGColor = "#1c1c24";
@@ -37,8 +37,10 @@ const multiplier = 1;
 
 const globalUnit = 50*multiplier;
 const globalWall = 5*multiplier;
-const globalPath = 10*multiplier;
+const globalPath = 15*multiplier;
 const globalRoute = 25*multiplier;
+
+const globalDebugColors = false;
 
 // const globalUnit = 35;
 // const globalWall = 3;
@@ -48,19 +50,24 @@ const globalRoute = 25*multiplier;
 const randomInt = (min, max) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
-function removeCommonCoordinates(e: { x: number, y: number }[], f: { x: number, y: number }[]): [{ x: number, y: number }[], { x: number, y: number }[]] {
     // Helper function to compare two objects
-    function arePointsEqual(a: { x: number, y: number }, b: { x: number, y: number }): boolean {
-        return a.x === b.x && a.y === b.y;
-    }
+function areCoordinatesEqual(a: { x: number, y: number }, b: { x: number, y: number }): boolean {
+    return a.x === b.x && a.y === b.y;
+}
 
+function removeCommonCoordinates(e: { x: number, y: number }[], f: { x: number, y: number }[]): [{ x: number, y: number }[], { x: number, y: number }[]] {
     // Remove items from e that are in f
-    const newE = e.filter(eItem => !f.some(fItem => arePointsEqual(eItem, fItem)));
+    const newE = e.filter(eItem => !f.some(fItem => areCoordinatesEqual(eItem, fItem)));
     
     // Remove items from f that are in e
-    const newF = f.filter(fItem => !e.some(eItem => arePointsEqual(fItem, eItem)));
+    const newF = f.filter(fItem => !e.some(eItem => areCoordinatesEqual(fItem, eItem)));
     
     return [newE, newF];
+}
+
+function isCoordinateInList(target: { x: number, y: number }, arr: { x: number, y: number }[]): boolean {
+    // Check if any object in the array matches the target object
+    return arr.some(item => areCoordinatesEqual(item, target));
 }
 
 function coordinateRect(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
@@ -298,19 +305,25 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         }
     }
 
-    drawOrigin(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, fakeOriginX: number = this.originX, fakeOriginY: number = this.originY) {
+    drawOrigin(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, exclusions:{x:number, y:number}[] = [], fakeOriginX: number = this.originX, fakeOriginY: number = this.originY, isfakeOriginColor:boolean = false) {
+        if (isCoordinateInList({ x: fakeOriginX, y: fakeOriginY }, exclusions)) {return;}
         let x = offsetX + (fakeOriginX* unitDist) + ((unitDist-unitSize)/2);
         let y = offsetY + (fakeOriginY * unitDist) + ((unitDist-unitSize)/2);
         ctx.beginPath();
-        ctx.fillStyle = (fakeOriginX == this.originX && fakeOriginY == this.originY) ? originColor : fakeOriginColor;
+        ctx.fillStyle = (isfakeOriginColor) ? fakeOriginColor : originColor;
         ctx.rect(x, y, unitSize, unitSize);
         ctx.closePath();
         ctx.fill();
     }
 
-    drawPath(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, debugColors:boolean = false) {
+    drawPath(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, debugColors:boolean = false, exclusions:{x:number, y:number}[] = []) {
         for (var i = 0; i < this.height; i++) {
             for (var j = 0; j < this.width; j++) {
+
+                if (isCoordinateInList({ x: j, y: i }, exclusions)) {
+                    continue;
+                }
+
                 let k = this.matrix[i][j];
                 let x = offsetX + (j * unitDist) + ((unitDist-unitSize)/2);
                 let y = offsetY + (i * unitDist) + ((unitDist-unitSize)/2);
@@ -363,10 +376,10 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             }
         }
     }
-    drawRoute(ctx: CanvasRenderingContext2D, unitSize: number, unitStartSize: number, unitDist: number, wall: number, offsetX: number, offsetY: number, startX: number = 0, startY: number = 0, endX: number = this.width-1, endY: number = this.height-1) {
-        this.drawOrigin(ctx, unitSize, unitDist, offsetX, offsetY, endX, endY); // fake origin
+    drawRoute(ctx: CanvasRenderingContext2D, unitSize: number, unitStartSize: number, unitDist: number, wall: number, offsetX: number, offsetY: number, startX: number = 0, startY: number = 0, endX: number = this.width-1, endY: number = this.height-1):{x:number, y:number}[] {
+        this.drawOrigin(ctx, unitSize, unitDist, offsetX, offsetY, [], endX, endY, true); // fake origin
         if ((startX == endX) && (startY == endY)) {
-            return;
+            return [{"x": startX, "y": startY}];
         }
 
         let startToOrigin:{ x: number, y: number }[] = [];
@@ -431,11 +444,12 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                     break;
             }
         }
+        let originMaster: { x: number, y: number } | null = null;
         var [startToOrigin2, endToOrigin2] = removeCommonCoordinates(startToOrigin, endToOrigin);
         if (startToOrigin2.length == 0 || endToOrigin2.length == 0) {
             // console.log("es",startToOrigin2, endToOrigin2);
         } else {
-            this.drawOriginMaster(ctx, unitSize, unitDist, offsetX, offsetY, startToOrigin2[startToOrigin2.length-1], endToOrigin2[endToOrigin2.length-1], startX, startY);
+            originMaster = this.drawOriginMaster(ctx, unitSize, unitDist, offsetX, offsetY, startToOrigin2[startToOrigin2.length-1], endToOrigin2[endToOrigin2.length-1], startX, startY);
         }
 
 
@@ -601,9 +615,23 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         }
         ctx.fill();
         ctx.closePath();
+
+        let rV = [
+            ...startToOrigin2,
+            ...endToOrigin2,
+            {
+                "x": startX,
+                "y": startY
+            },
+            {
+                "x": endX,
+                "y": endY
+            },
+        ];
+        return originMaster != null ? [...rV, originMaster, ] : [...rV];
     }
 
-    drawOriginMaster(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, startMaster: { x: number, y: number }, endMaster: { x: number, y: number }, startX: number, startY: number) {
+    drawOriginMaster(ctx: CanvasRenderingContext2D, unitSize: number, unitDist: number, offsetX: number, offsetY: number, startMaster: { x: number, y: number }, endMaster: { x: number, y: number }, startX: number, startY: number): { x: number, y: number } | null {
         let trueMaster:{ x: number, y: number }|null = null;
         switch (this.matrix[startMaster["y"]][startMaster["x"]]) {
             case MazeNode.DOWN:
@@ -635,7 +663,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         }
         if (trueMaster != null) {
             if (trueMaster["x"] == startX && trueMaster["y"] == startY) {
-                return;
+                return null;
             }
         }
         let trueMasterDirection:MazeNode|null = null;
@@ -694,6 +722,8 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
             ctx.fill();
         }
 
+        return trueMaster;
+
     }
 
 }
@@ -708,9 +738,9 @@ function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
     ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
 
     mazeObj.drawMaze(ctx, globalUnit, offset["offsetX"], offset["offsetY"], globalWall);
-    mazeObj.drawPath(ctx, globalPath, globalUnit, offset["offsetX"], offset["offsetY"],false);
-    mazeObj.drawOrigin(ctx, globalRoute , globalUnit, offset["offsetX"], offset["offsetY"]);
-    mazeObj.drawRoute(ctx, globalRoute, globalUnit, globalUnit, globalWall, offset["offsetX"], offset["offsetY"],globalStartX,globalStartY,globalEndX,globalEndY);
+    let exclusions = mazeObj.drawRoute(ctx, globalRoute, globalUnit, globalUnit, globalWall, offset["offsetX"], offset["offsetY"],globalStartX,globalStartY,globalEndX,globalEndY);
+    mazeObj.drawPath(ctx, globalPath, globalUnit, offset["offsetX"], offset["offsetY"],globalDebugColors,exclusions);
+    mazeObj.drawOrigin(ctx, globalRoute , globalUnit, offset["offsetX"], offset["offsetY"],exclusions);
     // if (n < m) {
     //     mazeObj.step();
     //     n++;
