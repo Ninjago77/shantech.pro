@@ -505,6 +505,21 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         let x = offsetX + (startX * unitDist) + ((unitDist-unitSize)/2);
         let y = offsetY + (startY * unitDist) + ((unitDist-unitSize)/2);
         
+        if (startToOrigin2.length == 0) {
+            let l = endToOrigin2[endToOrigin2.length-1];
+            if (l["x"] == startX-1) {
+                k = MazeNode.LEFT;
+            }
+            if (l["x"] == startX+1) {
+                k = MazeNode.RIGHT;
+            }
+            if (l["y"] == startY-1) {
+                k = MazeNode.UP;
+            }
+            if (l["y"] == startY+1) {
+                k = MazeNode.DOWN;
+            }
+        }        
         ctx.beginPath();
         ctx.fillStyle = pathColor;
         switch (k) {
@@ -685,9 +700,15 @@ function addEventListeners() {
         cursorX = event.clientX;
         cursorY = event.clientY;
     })
-    // let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    let canvas = document.getElementById("canvas") as HTMLCanvasElement;
     window.addEventListener('mousedown', (event) => mazeObj.living = false);
     window.addEventListener('mouseup', (event) => mazeObj.living = true);
+    window.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, 5, offset);
+        globalEndX = c["x"];
+        globalEndY = c["y"];
+    });
 }
 
 resizeCanvas();
