@@ -14,7 +14,8 @@ enum MazeNode{
 // const BGColor = "black";
 // const stepDelay = 0;
 
-const wallColor = "#464854";
+const wallColor = "#828ba8";
+const wallStrokeColor = "#464854";
 const fakeOriginColor = "#6fabb0";
 const originColor = "#2f28fa";
 const nodeColor = "#485e46";
@@ -33,6 +34,8 @@ var globalEndY:number = 0;
 var cursorX:number = -1;
 var cursorY:number = -1;
 
+var globalOriginTrack = false;
+
 // When both multipliers are the same, the quality looks amazing!!!
 const iconMultiplier = 3;
 const resolutionGraphicsMultiplier = 3;
@@ -41,6 +44,7 @@ const globalUnit = 50*iconMultiplier;
 const globalWall = 5*iconMultiplier;
 const globalPath = 15*iconMultiplier;
 const globalRoute = 25*iconMultiplier;
+const globalLineWidth = globalWall/2;
 
 const globalDebugColors = false;
 
@@ -72,11 +76,16 @@ function isCoordinateInList(target: { x: number, y: number }, arr: { x: number, 
     return arr.some(item => areCoordinatesEqual(item, target));
 }
 
-function coordinateRect(ctx: CanvasRenderingContext2D, fillStyle: string | CanvasGradient | CanvasPattern, x1: number, y1: number, x2: number, y2: number) {
+function coordinateRect(ctx: CanvasRenderingContext2D, fillStyle: string | CanvasGradient | CanvasPattern, x1: number, y1: number, x2: number, y2: number, lineWidth: number | null = null, strokeStyle: string | CanvasGradient | CanvasPattern = ctx.strokeStyle) {
     ctx.beginPath();
     ctx.fillStyle = fillStyle;
     ctx.rect(x1,y1,x2-x1,y2-y1);
     ctx.fill();
+    if (lineWidth) {
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = strokeStyle;
+        ctx.stroke();
+    }
     ctx.closePath();
 }
 
@@ -139,6 +148,8 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
     public matrix: MazeNode[][];
     public originX: number;
     public originY: number;
+    public trackOriginX: number;
+    public trackOriginY: number;
     public living: boolean;
     public drawQueue: DrawQueueItem[];
     constructor(public height: number, public width: number) {
@@ -191,6 +202,10 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                 }
             }
         }
+        
+        this.trackOriginX = this.originX;
+        this.trackOriginY = this.originY;
+
         this.clearOriginDirections();
     }
 
@@ -213,6 +228,9 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         this.matrix[this.originY][this.originX] = MazeNode.NONE;
     }
     changeStateFromNewOrigin(newOriginCellX: number, newOriginCellY: number) {
+        if (this.originX == newOriginCellX && this.originY == newOriginCellY) {
+            return;
+        }
         if (this.originX-1 == newOriginCellX) {
             this.matrix[this.originY][this.originX] = MazeNode.LEFT;
         }
@@ -265,8 +283,28 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
 
     step() {
         if (!this.living) {return;}
-        let newOrigin = this.randomNewOrigin();
-        this.changeStateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+        if (!globalOriginTrack) {
+            let newOrigin = this.randomNewOrigin();
+            this.changeStateFromNewOrigin(newOrigin['x'], newOrigin['y']);
+        } else {            
+            let newOriginDir = this.getNewOrigin();
+            let x = this.originX;
+            let y = this.originY;
+            switch (newOriginDir) {
+                case MazeNode.DOWN:
+                    y++;
+                    break;
+                case MazeNode.LEFT:
+                    x--;
+                    break;
+                case MazeNode.RIGHT:
+                    x++;
+                    break;
+                case MazeNode.UP:
+                    y--;
+            }
+            this.changeStateFromNewOrigin(x,y);
+        }
         this.clearOriginDirections();
     }
 
@@ -319,8 +357,26 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         }
     }
 
+    getNewOrigin(): MazeNode {
+        if (this.originX === this.trackOriginX && this.originY === this.trackOriginY) {
+            return MazeNode.NONE;
+        }
     
-    drawMaze(ctx: CanvasRenderingContext2D, unitSize: number, offsetX: number, offsetY: number, wall: number = 5) {
+        let deltaX = this.trackOriginX - this.originX;
+        let deltaY = this.trackOriginY - this.originY;
+    
+        // Prioritize diagonal movement by comparing absolute values of deltas
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal movement
+            return deltaX > 0 ? MazeNode.RIGHT : MazeNode.LEFT;
+        } else {
+            // Vertical movement
+            return deltaY > 0 ? MazeNode.DOWN : MazeNode.UP;
+        }
+    }
+
+    
+    drawMaze(ctx: CanvasRenderingContext2D, unitSize: number, offsetX: number, offsetY: number, wall: number, lineWidth: number) {
         // ctx.lineWidth = wall;
         // ctx.fillStyle = wallColor;
         for (var i = 0; i < this.height; i++) {
@@ -335,31 +391,104 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
                         ctx,
                         wallColor,
                         x - wall, y - wall,
-                        x + unitSize + wall, y + wall
+                        x + wall, y + wall,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x + wall, y - wall,
+                        x - wall + unitSize, y + wall,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall + unitSize, y - wall,
+                        x + wall + unitSize, y + wall,
+                        lineWidth,
+                        wallStrokeColor,
                     ]);
                 }
                 if ((j == 0 || this.matrix[i][j - 1] != MazeNode.RIGHT) && (cell != MazeNode.LEFT)) {
+
                     this.addToDrawQueue(coordinateRect,[
                         ctx,
                         wallColor,
                         x - wall, y - wall,
-                        x + wall, y + unitSize + wall
+                        x + wall, y + wall,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall, y + wall,
+                        x + wall, y - wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall, y - wall + unitSize,
+                        x + wall, y + wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
                     ]);
                 }
                 if ((i == this.height - 1 || this.matrix[i + 1][j] != MazeNode.UP) && (cell != MazeNode.DOWN)) {
                     this.addToDrawQueue(coordinateRect,[
                         ctx,
                         wallColor,
-                        x - wall, y + unitSize - wall,
-                        x + unitSize + wall, y + unitSize + wall
+                        x - wall, y - wall + unitSize,
+                        x + wall, y + wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x + wall, y - wall + unitSize,
+                        x - wall + unitSize, y + wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall + unitSize, y - wall + unitSize,
+                        x + wall + unitSize, y + wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
                     ]);
                 }
                 if ((j == this.width - 1 || this.matrix[i][j + 1] != MazeNode.LEFT) && (cell != MazeNode.RIGHT)) {
                     this.addToDrawQueue(coordinateRect,[
                         ctx,
                         wallColor,
-                        x + unitSize - wall, y - wall,
-                        x + unitSize + wall, y + unitSize + wall
+                        x - wall + unitSize, y - wall,
+                        x + wall + unitSize, y + wall,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall + unitSize, y + wall,
+                        x + wall + unitSize, y - wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
+                    ]);
+                    this.addToDrawQueue(coordinateRect,[
+                        ctx,
+                        wallColor,
+                        x - wall + unitSize, y - wall + unitSize,
+                        x + wall + unitSize, y + wall + unitSize,
+                        lineWidth,
+                        wallStrokeColor,
                     ]);
                 }
                 // console.log(j,i, this.matrix[i][j]);
@@ -659,7 +788,7 @@ function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
         ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
     },[]);
 
-    mazeObj.drawMaze(ctx, globalUnit, offset["offsetX"], offset["offsetY"], globalWall);
+    mazeObj.drawMaze(ctx, globalUnit, offset["offsetX"], offset["offsetY"], globalWall, globalLineWidth);
     let exclusions = mazeObj.drawRoute(ctx, globalRoute, globalUnit, globalUnit, globalWall, offset["offsetX"], offset["offsetY"],globalStartX,globalStartY,globalEndX,globalEndY);
     mazeObj.drawPath(ctx, globalPath, globalUnit, offset["offsetX"], offset["offsetY"],globalDebugColors,exclusions);
     mazeObj.drawOrigin(ctx, globalRoute , globalUnit, offset["offsetX"], offset["offsetY"],exclusions);
@@ -716,6 +845,14 @@ function addEventListeners() {
                 globalEndX = c["x"];
                 globalEndY = c["y"];
             }
+            if (e.key == "/" || e.code == "Slash") {
+                globalOriginTrack = true;          
+                let c = mazeObj.mouseOverCellCalculate(cursorX, cursorY, canvas.height, canvas.width, window.innerHeight, window.innerWidth, globalWall, offset);
+                mazeObj.trackOriginX = c["x"];
+                mazeObj.trackOriginY = c["y"];
+                //idisidj print(jfij , [87ddd + for I in range() i kill you pretty quickly])
+            }
+            
         });
     } else {
         let content = document.getElementsByClassName("content")[0] as HTMLDivElement;
