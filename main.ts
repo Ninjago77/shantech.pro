@@ -549,7 +549,7 @@ class OriginShiftMaze { // CaptainLuma's Algorithm
         this.addToDrawQueue(() => {
             ctx.beginPath();
             ctx.fillStyle = hoverColor;
-            ctx.rect(offsetX + (startX * unitDist) + wall, offsetY + (startY * unitDist) + wall, unitStartSize - (wall*2), unitStartSize - (wall*2));
+            ctx.rect(offsetX + (startX * unitDist) + wall , offsetY + (startY * unitDist) + wall , unitStartSize - (wall*2), unitStartSize - (wall*2));
             ctx.fill();
             ctx.closePath();
         },[]);
@@ -789,10 +789,10 @@ function drawMazeGame(mazeObj: OriginShiftMaze,ctx:CanvasRenderingContext2D) {
         ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
     },[]);
 
-    mazeObj.drawMaze(ctx, globalUnit, offset["offsetX"], offset["offsetY"], globalWall, globalLineWidth);
     let exclusions = mazeObj.drawRoute(ctx, globalRoute, globalUnit, globalUnit, globalWall, offset["offsetX"], offset["offsetY"],globalStartX,globalStartY,globalEndX,globalEndY);
     mazeObj.drawPath(ctx, globalPath, globalUnit, offset["offsetX"], offset["offsetY"],globalDebugColors,exclusions);
     mazeObj.drawOrigin(ctx, globalRoute , globalUnit, offset["offsetX"], offset["offsetY"],exclusions);
+    mazeObj.drawMaze(ctx, globalUnit, offset["offsetX"], offset["offsetY"], globalWall, globalLineWidth);
 
     mazeObj.executeDrawQueue();
     // if (n < m) {
